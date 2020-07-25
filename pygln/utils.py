@@ -40,16 +40,16 @@ def deskewAll(X):
 ###################################################
 
 
-def get_mnist(deskewed=True):
+def get_mnist(deskewed=True, download_path='./data'):
     from torchvision.datasets import MNIST
 
-    trainset = MNIST('./data', train=True, download=True)
+    trainset = MNIST(download_path, train=True, download=True)
     X_train = trainset.data.numpy().reshape(60000, -1).astype(np.float) / 255
     if deskewed:
         X_train = deskewAll(X_train)
     y_train = trainset.targets.numpy()
 
-    testset = MNIST('./data', train=False, download=True)
+    testset = MNIST(download_path, train=False, download=True)
     X_test = testset.data.numpy().reshape(10000, -1).astype(np.float) / 255
     if deskewed:
         X_test = deskewAll(X_test)
@@ -67,6 +67,7 @@ def shuffle_data(X, y):
 
 def evaluate_mnist(model,
                    deskewed=True,
+                   download_path='./path',
                    batch_size=1,
                    num_epochs=1,
                    mnist_class=None,
@@ -75,7 +76,7 @@ def evaluate_mnist(model,
     from tqdm import tqdm
 
     # get MNIST data as numpy arrays
-    X_train, y_train, X_test, y_test = get_mnist(deskewed)
+    X_train, y_train, X_test, y_test = get_mnist(deskewed, download_path=download_path)
     # randomly shuffle data
     X_train, y_train = shuffle_data(X_train, y_train)
     X_test, y_test = shuffle_data(X_test, y_test)
