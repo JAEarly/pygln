@@ -62,7 +62,6 @@ class Linear(nn.Module):
         super().__init__()
 
         assert size > 0 and input_size > 0 and context_size > 0
-        assert context_map_size >= 2
         assert num_classes >= 2
 
         self.num_classes = num_classes if num_classes > 2 else 1
@@ -120,11 +119,16 @@ class Linear(nn.Module):
 
     def predict(self, logit, context, target=None):
         # project side information and determine context index
-        distances = torch.matmul(self._context_maps, context.T)
-        mapped_context_binary = (distances > self._context_bias).int()
-        current_context_indices = torch.sum(mapped_context_binary *
-                                            self._boolean_converter,
-                                            dim=-2)
+        if self._weights.shape[2] > 1:
+            # perform context mapping when there is more than one context
+            distances = torch.matmul(self._context_maps, context.T)
+            mapped_context_binary = (distances > self._context_bias).int()
+            current_context_indices = torch.sum(mapped_context_binary *
+                                                self._boolean_converter,
+                                                dim=-2)
+        else:
+            # only one context, so everything to map that to that (context zero)
+            current_context_indices = torch.zeros((self.num_classes, self.size, context.shape[0])).long()
 
         # select all context across all neurons in layer
         current_selected_weights = self._weights[

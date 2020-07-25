@@ -64,7 +64,6 @@ class GLNBase(OnlineUpdateModel):
         assert input_size > 0
         self.input_size = input_size
 
-        assert context_map_size >= 2
         self.context_map_size = context_map_size
 
         assert num_classes >= 2
